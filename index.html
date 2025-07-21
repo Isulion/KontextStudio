@@ -8,164 +8,191 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
-        /* --- PALETTE PASTEL --- */
+        /* --- PALETTES DE COULEURS --- */
         :root {
-            --bg-color: #fdf8f5;
-            --surface-color: #ffffff;
-            --primary-color: #aec6cf; /* Pastel Blue */
-            --secondary-color: #ffb3a7; /* Pastel Coral */
-            --text-color: #4a4a4a;
-            --subtle-text-color: #777;
-            --border-color: #e0e0e0;
-            --input-bg: #f5f5f5;
-            --success-color: #77dd77; /* Pastel Green */
+            /* Thème Clair (Pastel) */
+            --bg-color-light: #fdf8f5;
+            --surface-color-light: #ffffff;
+            --primary-color-light: #aec6cf; /* Pastel Blue */
+            --secondary-color-light: #ffb3a7; /* Pastel Coral */
+            --text-color-light: #4a4a4a;
+            --subtle-text-color-light: #777;
+            --border-color-light: #e0e0e0;
+            --input-bg-light: #f5f5f5;
+            --success-color-light: #77dd77; /* Pastel Green */
+
+            /* Thème Sombre (Dark) */
+            --bg-color-dark: #0d0d1a;
+            --surface-color-dark: #1a1a2e;
+            --primary-color-dark: #aec6cf; /* Maintenu pour la cohérence */
+            --secondary-color-dark: #ffb3a7; /* Maintenu pour la cohérence */
+            --text-color-dark: #e0e0e0;
+            --subtle-text-color-dark: #888;
+            --border-color-dark: #2a2a3e;
+            --input-bg-dark: #252538;
+            --success-color-dark: #77dd77;
         }
-
-        * { box-sizing: border-box; }
-
+        
+        /* --- Assignation des variables CSS --- */
         body {
+            --bg-color: var(--bg-color-light);
+            --surface-color: var(--surface-color-light);
+            --primary-color: var(--primary-color-light);
+            --secondary-color: var(--secondary-color-light);
+            --text-color: var(--text-color-light);
+            --subtle-text-color: var(--subtle-text-color-light);
+            --border-color: var(--border-color-light);
+            --input-bg: var(--input-bg-light);
+            --success-color: var(--success-color-light);
+            
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Poppins', sans-serif;
             line-height: 1.7;
             margin: 0;
             padding: 1rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode {
+            --bg-color: var(--bg-color-dark);
+            --surface-color: var(--surface-color-dark);
+            --primary-color: var(--primary-color-dark);
+            --secondary-color: var(--secondary-color-dark);
+            --text-color: var(--text-color-dark);
+            --subtle-text-color: var(--subtle-text-color-dark);
+            --border-color: var(--border-color-dark);
+            --input-bg: var(--input-bg-dark);
+            --success-color: var(--success-color-dark);
         }
 
-        .container {
-            max-width: 950px;
-            margin: 0 auto;
-        }
+        * { box-sizing: border-box; }
 
-        /* --- HEADER --- */
-        header { text-align: center; margin-bottom: 2.5rem; }
-        h1 {
-            font-weight: 700;
-            font-size: clamp(2.2rem, 5vw, 3rem);
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-        }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        /* --- HEADER & THEME SWITCH --- */
+        header { text-align: center; margin-bottom: 2.5rem; position: relative; }
+        h1 { font-weight: 700; font-size: clamp(2.2rem, 5vw, 3rem); color: var(--text-color); margin-bottom: 0.5rem; }
         .subtitle { color: var(--subtle-text-color); margin-top: 0; font-size: 1.1em; }
+        
+        .theme-switch-wrapper {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 34px;
+            position: relative;
+            width: 60px;
+        }
+        .theme-switch input { display: none; }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            background-color: white;
+            bottom: 4px;
+            content: "";
+            height: 26px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 26px;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .slider .icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #fff;
+        }
+        .slider .sun { left: 8px; }
+        .slider .moon { right: 8px; }
 
-        /* --- OUTPUT STICKY --- */
+        /* --- STICKY OUTPUT --- */
         #output-container {
-            position: sticky;
-            top: 1rem;
-            background: var(--surface-color);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
-            z-index: 10;
-            margin-bottom: 2rem;
+            position: sticky; top: 1rem; background: var(--surface-color); padding: 1.5rem;
+            border-radius: 12px; border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07); z-index: 10; margin-bottom: 2rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         #output-wrapper { display: flex; gap: 1rem; align-items: stretch; }
         #prompt-output {
-            width: 100%;
-            min-height: 90px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            font-size: 1.1em;
-            resize: vertical;
+            width: 100%; min-height: 90px; background-color: var(--input-bg);
+            border: 1px solid var(--border-color); color: var(--text-color);
+            padding: 0.8rem 1rem; border-radius: 8px; font-size: 1.1em; resize: vertical;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
-        #copy-button {
-            padding: 0.8rem 1rem;
-            flex-shrink: 0;
-            background-color: var(--primary-color);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        #copy-button.success {
-            background-color: var(--success-color);
-        }
+        #copy-button { padding: 0.8rem 1rem; flex-shrink: 0; background-color: var(--primary-color); color: white; transition: all 0.3s ease; }
+        #copy-button.success { background-color: var(--success-color); }
 
         /* --- TABS --- */
         .tabs { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
         .tab-button {
-            padding: 0.7rem 1.3rem;
-            cursor: pointer;
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 50px; /* Pill shape */
-            color: var(--subtle-text-color);
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 0.7rem 1.3rem; cursor: pointer; background: var(--surface-color);
+            border: 1px solid var(--border-color); border-radius: 50px; color: var(--subtle-text-color);
+            font-weight: 600; transition: all 0.3s ease;
         }
-        .tab-button:hover {
-            border-color: var(--primary-color);
-            color: var(--text-color);
-        }
+        .tab-button:hover { border-color: var(--primary-color); color: var(--text-color); }
         .tab-button.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background-color: var(--primary-color); color: white; border-color: var(--primary-color);
             box-shadow: 0 2px 8px rgba(174, 198, 207, 0.5);
         }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
+
         /* --- GENERATOR CARDS --- */
         .prompt-generator {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            background-color: var(--surface-color); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;
         }
         h3 { color: var(--secondary-color); margin-top:0; border-bottom: 1px solid var(--border-color); padding-bottom: 0.7rem; margin-bottom: 1.2rem; }
         .prompt-template {
-            background-color: var(--input-bg);
-            padding: 0.8rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            color: var(--subtle-text-color);
-            font-family: monospace;
-            border-left: 3px solid var(--secondary-color);
-            word-wrap: break-word;
+            background-color: var(--input-bg); padding: 0.8rem; border-radius: 4px;
+            margin-bottom: 1rem; color: var(--subtle-text-color); font-family: monospace;
+            border-left: 3px solid var(--secondary-color); word-wrap: break-word; transition: all 0.3s ease;
         }
         
         /* --- FORM ELEMENTS --- */
         .input-group { margin-bottom: 1rem; }
         .input-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.9em; color: var(--text-color); }
         input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-color);
-            font-size: 1em;
-            transition: all 0.3s ease;
+            width: 100%; padding: 0.8rem 1rem; background-color: var(--input-bg);
+            border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color);
+            font-size: 1em; transition: all 0.3s ease;
         }
         input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(174, 198, 207, 0.4); }
         .conditional-input { display: none; margin-top: 1rem; animation: fadeIn 0.5s ease; }
         
         .button-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
         button {
-            flex-grow: 1;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.2rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.2s ease;
+            flex-grow: 1; color: white; border: none; padding: 0.8rem 1.2rem;
+            border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease;
         }
         button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
         button:active { transform: translateY(0); }
         .btn-generate { background-color: var(--primary-color); }
         .btn-append { background: var(--surface-color); border: 2px solid var(--primary-color); color: var(--primary-color); }
-        
+
         /* --- TIPS & FOOTER --- */
-        .tips { background-color: rgba(255, 179, 167, 0.15); border-left: 4px solid var(--secondary-color); padding: 1.2rem; margin: 2.5rem 0; border-radius: 4px; }
+        .tips {
+            background-color: var(--input-bg); border-left: 4px solid var(--secondary-color);
+            padding: 1.2rem; margin: 2.5rem 0; border-radius: 4px; transition: all 0.3s ease;
+        }
         .tips h3 { margin-top: 0; color: var(--secondary-color); border: none; }
         .tips ul { padding-left: 1.2rem; margin: 0; color: var(--text-color); }
         
@@ -177,12 +204,21 @@
 
     <div class="container">
         <header>
+             <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="theme-toggle">
+                    <input type="checkbox" id="theme-toggle" />
+                    <div class="slider">
+                        <span class="icon sun">☀️</span>
+                        <span class="icon moon">🌙</span>
+                    </div>
+                </label>
+            </div>
             <h1>KONTEXT Studio Pro ✨</h1>
             <p class="subtitle">Votre assistant pour créer des prompts parfaits pour Flux-1 Kontext.</p>
         </header>
 
         <main>
-            <div id="output-container">
+             <div id="output-container">
                 <div id="output-wrapper">
                     <textarea id="prompt-output" readonly placeholder="Votre prompt personnalisé apparaîtra ici..."></textarea>
                     <button id="copy-button">Copier</button>
@@ -318,18 +354,40 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const outputArea = document.getElementById('prompt-output');
+            const themeToggle = document.getElementById('theme-toggle');
 
+            // --- GESTION DU THÈME ---
+            function setDarkMode(isDark) {
+                document.body.classList.toggle('dark-mode', isDark);
+                themeToggle.checked = isDark;
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            }
+
+            // Vérifier le thème sauvegardé ou le thème système
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme) {
+                setDarkMode(savedTheme === 'dark');
+            } else {
+                setDarkMode(prefersDark);
+            }
+
+            themeToggle.addEventListener('change', () => {
+                setDarkMode(themeToggle.checked);
+            });
+            
+            // --- SYSTÈME D'ONGLETS ---
             const tabs = document.querySelectorAll('.tab-button');
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelector('.tab-button.active').classList.remove('active');
                     tab.classList.add('active');
-                    
                     document.querySelector('.tab-pane.active').classList.remove('active');
                     document.getElementById(tab.dataset.tab).classList.add('active');
                 });
             });
 
+            // --- CHAMPS CONDITIONNELS ---
             document.querySelectorAll('input[type="checkbox"][data-conditional]').forEach(checkbox => {
                 const conditionalInput = checkbox.closest('.prompt-generator').querySelector('.conditional-input');
                 if (conditionalInput) {
@@ -339,6 +397,7 @@
                 }
             });
 
+            // --- LOGIQUE DE GÉNÉRATION DES PROMPTS ---
             document.querySelectorAll('.prompt-generator').forEach(generator => {
                 const sectionId = generator.dataset.id;
                 const buttonGroup = document.createElement('div');
@@ -348,7 +407,6 @@
                     <button class="btn-append">Ajouter au prompt</button>
                 `;
                 generator.appendChild(buttonGroup);
-
                 buttonGroup.querySelector('.btn-generate').addEventListener('click', () => processPrompt(generator, false));
                 buttonGroup.querySelector('.btn-append').addEventListener('click', () => processPrompt(generator, true));
             });
@@ -415,14 +473,16 @@
                 }
             }
 
+            // --- BOUTON COPIER ---
             const copyButton = document.getElementById('copy-button');
             copyButton.addEventListener('click', () => {
                 if (!outputArea.value) return;
                 navigator.clipboard.writeText(outputArea.value).then(() => {
+                    const originalText = copyButton.textContent;
                     copyButton.textContent = 'Copié !';
                     copyButton.classList.add('success');
                     setTimeout(() => {
-                        copyButton.textContent = 'Copier';
+                        copyButton.textContent = originalText;
                         copyButton.classList.remove('success');
                     }, 2000);
                 });
