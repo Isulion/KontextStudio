@@ -10,7 +10,6 @@
 
         /* --- PALETTES DE COULEURS --- */
         :root {
-            /* Thème Clair (Pastel) */
             --bg-color-light: #fdf8f5;
             --surface-color-light: #ffffff;
             --primary-color-light: #aec6cf; /* Pastel Blue */
@@ -20,20 +19,20 @@
             --border-color-light: #e0e0e0;
             --input-bg-light: #f5f5f5;
             --success-color-light: #77dd77; /* Pastel Green */
+            --particle-color-light: #c3d3d9;
 
-            /* Thème Sombre (Dark) */
             --bg-color-dark: #0d0d1a;
             --surface-color-dark: #1a1a2e;
-            --primary-color-dark: #aec6cf; /* Maintenu pour la cohérence */
-            --secondary-color-dark: #ffb3a7; /* Maintenu pour la cohérence */
+            --primary-color-dark: #aec6cf;
+            --secondary-color-dark: #ffb3a7;
             --text-color-dark: #e0e0e0;
             --subtle-text-color-dark: #888;
             --border-color-dark: #2a2a3e;
             --input-bg-dark: #252538;
             --success-color-dark: #77dd77;
+            --particle-color-dark: rgba(174, 198, 207, 0.3);
         }
         
-        /* --- Assignation des variables CSS --- */
         body {
             --bg-color: var(--bg-color-light);
             --surface-color: var(--surface-color-light);
@@ -44,6 +43,7 @@
             --border-color: var(--border-color-light);
             --input-bg: var(--input-bg-light);
             --success-color: var(--success-color-light);
+            --particle-color: var(--particle-color-light);
             
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -52,160 +52,120 @@
             margin: 0;
             padding: 1rem;
             transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative;
         }
         
         body.dark-mode {
             --bg-color: var(--bg-color-dark);
             --surface-color: var(--surface-color-dark);
-            --primary-color: var(--primary-color-dark);
-            --secondary-color: var(--secondary-color-dark);
             --text-color: var(--text-color-dark);
             --subtle-text-color: var(--subtle-text-color-dark);
             --border-color: var(--border-color-dark);
             --input-bg: var(--input-bg-dark);
             --success-color: var(--success-color-dark);
+            --particle-color: var(--particle-color-dark);
         }
 
         * { box-sizing: border-box; }
 
-        .container { max-width: 950px; margin: 0 auto; }
+        .container { max-width: 950px; margin: 0 auto; position: relative; z-index: 2; }
         
-        /* --- HEADER & THEME SWITCH --- */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            display: none;
+        }
+        body.animation-active #particle-canvas { display: block; }
+
         header { text-align: center; margin-bottom: 2.5rem; position: relative; }
         h1 { font-weight: 700; font-size: clamp(2.2rem, 5vw, 3rem); color: var(--text-color); margin-bottom: 0.5rem; }
         .subtitle { color: var(--subtle-text-color); margin-top: 0; font-size: 1.1em; }
         
-        .theme-switch-wrapper {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-        .theme-switch {
-            display: inline-block;
-            height: 34px;
-            position: relative;
-            width: 60px;
-        }
-        .theme-switch input { display: none; }
-        .slider {
-            background-color: #ccc;
-            bottom: 0;
-            cursor: pointer;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            background-color: white;
-            bottom: 4px;
-            content: "";
-            height: 26px;
-            left: 4px;
-            position: absolute;
-            transition: .4s;
-            width: 26px;
-            border-radius: 50%;
-        }
+        .toggles-container { position: absolute; top: 10px; right: 10px; display: flex; gap: 15px; align-items: center; }
+        .toggle-switch { display: inline-block; height: 34px; position: relative; width: 60px; }
+        .toggle-switch input { display: none; }
+        .slider { background-color: #ccc; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; border-radius: 34px; }
+        body.dark-mode .slider { background-color: #333; }
+        .slider:before { background-color: white; bottom: 4px; content: ""; height: 26px; left: 4px; position: absolute; transition: .4s; width: 26px; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(26px); }
         .slider .icon {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            color: #fff;
+            font-size: 18px;
+            line-height: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            user-select: none;
         }
-        .slider .sun { left: 8px; }
-        .slider .moon { right: 8px; }
+        
+        /* Icons for Theme Toggle */
+        #theme-toggle:not(:checked) ~ .slider .sun,
+        #theme-toggle:checked ~ .slider .moon { opacity: 1; }
+        .slider .sun { left: 7px; color: #f39c12; }
+        .slider .moon { right: 7px; color: #f1c40f; }
+        
+        /* Icons for Animation Toggle */
+        #animation-toggle:not(:checked) ~ .slider .fx-off,
+        #animation-toggle:checked ~ .slider .fx-on { opacity: 1; }
+        .slider .fx-on { right: 7px; color: var(--secondary-color); }
+        .slider .fx-off { left: 7px; color: #aaa; }
 
-        /* --- STICKY OUTPUT --- */
-        #output-container {
-            position: sticky; top: 1rem; background: var(--surface-color); padding: 1.5rem;
-            border-radius: 12px; border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07); z-index: 10; margin-bottom: 2rem;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+
+        /* ... Le reste du CSS est identique ... */
+        #output-container { position: sticky; top: 1rem; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07); z-index: 10; margin-bottom: 2rem; transition: background-color 0.3s ease, border-color 0.3s ease; }
         #output-wrapper { display: flex; gap: 1rem; align-items: stretch; }
-        #prompt-output {
-            width: 100%; min-height: 90px; background-color: var(--input-bg);
-            border: 1px solid var(--border-color); color: var(--text-color);
-            padding: 0.8rem 1rem; border-radius: 8px; font-size: 1.1em; resize: vertical;
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-        }
+        #prompt-output { width: 100%; min-height: 90px; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 0.8rem 1rem; border-radius: 8px; font-size: 1.1em; resize: vertical; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
         #copy-button { padding: 0.8rem 1rem; flex-shrink: 0; background-color: var(--primary-color); color: white; transition: all 0.3s ease; }
         #copy-button.success { background-color: var(--success-color); }
-
-        /* --- TABS --- */
         .tabs { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
-        .tab-button {
-            padding: 0.7rem 1.3rem; cursor: pointer; background: var(--surface-color);
-            border: 1px solid var(--border-color); border-radius: 50px; color: var(--subtle-text-color);
-            font-weight: 600; transition: all 0.3s ease;
-        }
+        .tab-button { padding: 0.7rem 1.3rem; cursor: pointer; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 50px; color: var(--subtle-text-color); font-weight: 600; transition: all 0.3s ease; }
         .tab-button:hover { border-color: var(--primary-color); color: var(--text-color); }
-        .tab-button.active {
-            background-color: var(--primary-color); color: white; border-color: var(--primary-color);
-            box-shadow: 0 2px 8px rgba(174, 198, 207, 0.5);
-        }
+        .tab-button.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 2px 8px rgba(174, 198, 207, 0.5); }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- GENERATOR CARDS --- */
-        .prompt-generator {
-            background-color: var(--surface-color); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;
-        }
+        .prompt-generator { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
         h3 { color: var(--secondary-color); margin-top:0; border-bottom: 1px solid var(--border-color); padding-bottom: 0.7rem; margin-bottom: 1.2rem; }
-        .prompt-template {
-            background-color: var(--input-bg); padding: 0.8rem; border-radius: 4px;
-            margin-bottom: 1rem; color: var(--subtle-text-color); font-family: monospace;
-            border-left: 3px solid var(--secondary-color); word-wrap: break-word; transition: all 0.3s ease;
-        }
-        
-        /* --- FORM ELEMENTS --- */
+        .prompt-template { background-color: var(--input-bg); padding: 0.8rem; border-radius: 4px; margin-bottom: 1rem; color: var(--subtle-text-color); font-family: monospace; border-left: 3px solid var(--secondary-color); word-wrap: break-word; transition: all 0.3s ease; }
         .input-group { margin-bottom: 1rem; }
         .input-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.9em; color: var(--text-color); }
-        input[type="text"], input[type="number"] {
-            width: 100%; padding: 0.8rem 1rem; background-color: var(--input-bg);
-            border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color);
-            font-size: 1em; transition: all 0.3s ease;
-        }
+        input[type="text"], input[type="number"] { width: 100%; padding: 0.8rem 1rem; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color); font-size: 1em; transition: all 0.3s ease; }
         input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(174, 198, 207, 0.4); }
         .conditional-input { display: none; margin-top: 1rem; animation: fadeIn 0.5s ease; }
-        
         .button-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
-        button {
-            flex-grow: 1; color: white; border: none; padding: 0.8rem 1.2rem;
-            border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease;
-        }
+        button { flex-grow: 1; color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; }
         button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
         button:active { transform: translateY(0); }
         .btn-generate { background-color: var(--primary-color); }
         .btn-append { background: var(--surface-color); border: 2px solid var(--primary-color); color: var(--primary-color); }
-
-        /* --- TIPS & FOOTER --- */
-        .tips {
-            background-color: var(--input-bg); border-left: 4px solid var(--secondary-color);
-            padding: 1.2rem; margin: 2.5rem 0; border-radius: 4px; transition: all 0.3s ease;
-        }
+        .tips { background-color: var(--input-bg); border-left: 4px solid var(--secondary-color); padding: 1.2rem; margin: 2.5rem 0; border-radius: 4px; transition: all 0.3s ease; }
         .tips h3 { margin-top: 0; color: var(--secondary-color); border: none; }
         .tips ul { padding-left: 1.2rem; margin: 0; color: var(--text-color); }
-        
         footer { text-align: center; margin-top: 3rem; color: #aaa; font-size: 0.9em;}
         footer a { color: var(--secondary-color); text-decoration: none; font-weight: 600; }
     </style>
 </head>
 <body>
 
+    <canvas id="particle-canvas"></canvas>
+
     <div class="container">
         <header>
-             <div class="theme-switch-wrapper">
-                <label class="theme-switch" for="theme-toggle">
+             <div class="toggles-container">
+                <label class="toggle-switch" for="animation-toggle">
+                    <input type="checkbox" id="animation-toggle" />
+                    <div class="slider">
+                         <span class="icon fx-off">✨</span>
+                         <span class="icon fx-on">✨</span>
+                    </div>
+                </label>
+                <label class="toggle-switch" for="theme-toggle">
                     <input type="checkbox" id="theme-toggle" />
                     <div class="slider">
                         <span class="icon sun">☀️</span>
@@ -218,7 +178,8 @@
         </header>
 
         <main>
-             <div id="output-container">
+            <!-- Le reste du HTML est inchangé -->
+            <div id="output-container">
                 <div id="output-wrapper">
                     <textarea id="prompt-output" readonly placeholder="Votre prompt personnalisé apparaîtra ici..."></textarea>
                     <button id="copy-button">Copier</button>
@@ -233,7 +194,6 @@
             </div>
             
             <div class="tab-content">
-                <!-- ==================== TAB BASE ==================== -->
                 <div id="tab-base" class="tab-pane active">
                     <section class="prompt-generator" data-id="color">
                         <h3>Changer la couleur</h3>
@@ -242,21 +202,18 @@
                         <div class="input-group"><label>Élément</label><input type="text" data-field="element" placeholder="ex: hair"></div>
                         <div class="input-group"><label>Nouvelle couleur</label><input type="text" data-field="new_color" placeholder="ex: red"></div>
                     </section>
-                    
                     <section class="prompt-generator" data-id="remove">
                         <h3>Retirer un élément</h3>
                         <div class="prompt-template">Remove [element] at [location] of the image</div>
                         <div class="input-group"><label>Élément à retirer</label><input type="text" data-field="element" placeholder="ex: the bird"></div>
                         <div class="input-group"><label>Localisation</label><input type="text" data-field="location" placeholder="ex: the top right"></div>
                     </section>
-                    
                     <section class="prompt-generator" data-id="add">
                         <h3>Ajouter un élément</h3>
                         <div class="prompt-template">Add [element] to the [location] of the scene</div>
                         <div class="input-group"><label>Objet/personnage</label><input type="text" data-field="element" placeholder="ex: a cute chicken"></div>
                         <div class="input-group"><label>Localisation</label><input type="text" data-field="location" placeholder="ex: left of the boy"></div>
                     </section>
-                    
                      <section class="prompt-generator" data-id="style">
                         <h3>Changer le Style</h3>
                         <div class="prompt-template">Turn this image style to [new_style]...</div>
@@ -268,8 +225,6 @@
                         <div class="conditional-input"><label>Personnage à préserver</label><input type="text" data-field="character" placeholder="ex: her, the man"></div>
                     </section>
                 </div>
-                
-                <!-- ==================== TAB PERSONNAGES ==================== -->
                 <div id="tab-personnages" class="tab-pane">
                     <section class="prompt-generator" data-id="pose">
                         <h3>Changer la pose et le lieu</h3>
@@ -278,7 +233,6 @@
                         <div class="input-group"><label>Pose/Action</label><input type="text" data-field="action" placeholder="ex: sitting in a deckchair"></div>
                         <div class="input-group"><label>Lieu</label><input type="text" data-field="location" placeholder="ex: by a swimming pool"></div>
                     </section>
-                    
                      <section class="prompt-generator" data-id="expression">
                         <h3>Changer l'expression</h3>
                         <div class="prompt-template">Put a [expression]... in [character] face. Don't change [pronoun] identity</div>
@@ -287,7 +241,6 @@
                         <div class="input-group"><label>Personnage</label><input type="text" data-field="character" placeholder="ex: woman"></div>
                         <div class="input-group"><label>Pronom</label><input type="text" data-field="pronoun" placeholder="ex: her"></div>
                     </section>
-                    
                     <section class="prompt-generator" data-id="makeup">
                         <h3>Maquiller ou Tatouer</h3>
                         <div class="prompt-template">Add [type] on [pronoun] face. Don't change [pronoun] identity</div>
@@ -295,8 +248,6 @@
                         <div class="input-group"><label>Pronom (his/her)</label><input type="text" data-field="pronoun" placeholder="ex: her"></div>
                     </section>
                 </div>
-
-                <!-- ==================== TAB SCENES ==================== -->
                 <div id="tab-scenes" class="tab-pane">
                     <section class="prompt-generator" data-id="background">
                         <h3>Changer l'arrière-plan</h3>
@@ -308,7 +259,6 @@
                         </div>
                         <div class="conditional-input"><label>Nom du personnage</label><input type="text" data-field="character" placeholder="ex: the panda"></div>
                     </section>
-                    
                     <section class="prompt-generator" data-id="weather">
                         <h3>Changer la météo</h3>
                         <div class="prompt-template">It's now [condition], [details]</div>
@@ -316,8 +266,6 @@
                         <div class="input-group"><label>Détails</label><input type="text" data-field="details" placeholder="ex: everything is covered in snow"></div>
                     </section>
                 </div>
-                
-                <!-- ==================== TAB TEXTE ==================== -->
                 <div id="tab-text" class="tab-pane">
                     <section class="prompt-generator" data-id="text">
                         <h3>Changer un texte</h3>
@@ -326,7 +274,6 @@
                         <div class="input-group"><label>Texte actuel</label><input type="text" data-field="actual_text" placeholder="ex: PIKAHI"></div>
                         <div class="input-group"><label>Nouveau texte</label><input type="text" data-field="new_text" placeholder="ex: PIKACHU"></div>
                     </section>
-                    
                     <section class="prompt-generator" data-id="texture">
                         <h3>Changer la texture</h3>
                         <div class="prompt-template">Design a textured [object] made entirely of [material]</div>
@@ -335,7 +282,6 @@
                     </section>
                 </div>
             </div>
-            
             <div class="tips">
                 <h3>Guides d'utilisation avancés</h3>
                 <ul>
@@ -355,138 +301,99 @@
         document.addEventListener('DOMContentLoaded', () => {
             const outputArea = document.getElementById('prompt-output');
             const themeToggle = document.getElementById('theme-toggle');
-
-            // --- GESTION DU THÈME ---
-            function setDarkMode(isDark) {
-                document.body.classList.toggle('dark-mode', isDark);
-                themeToggle.checked = isDark;
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            }
-
-            // Vérifier le thème sauvegardé ou le thème système
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme) {
-                setDarkMode(savedTheme === 'dark');
-            } else {
-                setDarkMode(prefersDark);
-            }
-
-            themeToggle.addEventListener('change', () => {
-                setDarkMode(themeToggle.checked);
-            });
+            const animationToggle = document.getElementById('animation-toggle');
             
-            // --- SYSTÈME D'ONGLETS ---
-            const tabs = document.querySelectorAll('.tab-button');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelector('.tab-button.active').classList.remove('active');
-                    tab.classList.add('active');
-                    document.querySelector('.tab-pane.active').classList.remove('active');
-                    document.getElementById(tab.dataset.tab).classList.add('active');
-                });
-            });
+            // --- GESTION DU THÈME ---
+            function setDarkMode(isDark) { document.body.classList.toggle('dark-mode', isDark); themeToggle.checked = isDark; localStorage.setItem('theme', isDark ? 'dark' : 'light'); }
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+            themeToggle.addEventListener('change', () => setDarkMode(themeToggle.checked));
 
-            // --- CHAMPS CONDITIONNELS ---
-            document.querySelectorAll('input[type="checkbox"][data-conditional]').forEach(checkbox => {
-                const conditionalInput = checkbox.closest('.prompt-generator').querySelector('.conditional-input');
-                if (conditionalInput) {
-                    checkbox.addEventListener('change', () => {
-                        conditionalInput.style.display = checkbox.checked ? 'block' : 'none';
-                    });
-                }
-            });
+            // --- GESTION DE L'ANIMATION DE FOND ---
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let animationFrameId;
 
-            // --- LOGIQUE DE GÉNÉRATION DES PROMPTS ---
-            document.querySelectorAll('.prompt-generator').forEach(generator => {
-                const sectionId = generator.dataset.id;
-                const buttonGroup = document.createElement('div');
-                buttonGroup.className = 'button-group';
-                buttonGroup.innerHTML = `
-                    <button class="btn-generate">Générer</button>
-                    <button class="btn-append">Ajouter au prompt</button>
-                `;
-                generator.appendChild(buttonGroup);
-                buttonGroup.querySelector('.btn-generate').addEventListener('click', () => processPrompt(generator, false));
-                buttonGroup.querySelector('.btn-append').addEventListener('click', () => processPrompt(generator, true));
-            });
+            function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            function getParticleColor() { return getComputedStyle(document.body).getPropertyValue('--particle-color'); }
 
-            function getVal(generator, field) {
-                const el = generator.querySelector(`[data-field="${field}"]`);
-                return el ? el.value.trim() : '';
+            class Particle {
+                constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = Math.random() * 0.4 - 0.2; this.vy = Math.random() * 0.4 - 0.2; this.radius = Math.random() * 1.5 + 1; }
+                update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
+                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = getParticleColor(); ctx.fill(); }
+            }
+            
+            function initParticles() {
+                particles = [];
+                const particleCount = Math.floor((canvas.width * canvas.height) / 20000);
+                for (let i = 0; i < particleCount; i++) { particles.push(new Particle()); }
             }
 
-            function processPrompt(generator, append) {
-                const sectionId = generator.dataset.id;
-                let prompt = "";
-
-                switch(sectionId) {
-                    case 'color':
-                        prompt = `Turn ${getVal(generator, 'original_color')} part of ${getVal(generator, 'element')} to ${getVal(generator, 'new_color')}`;
-                        break;
-                    case 'remove':
-                        prompt = `Remove ${getVal(generator, 'element')} at ${getVal(generator, 'location')} of the image`;
-                        break;
-                    case 'add':
-                        prompt = `Add ${getVal(generator, 'element')} to the ${getVal(generator, 'location')} of the scene`;
-                        break;
-                    case 'style':
-                        prompt = `Turn this image style to ${getVal(generator, 'new_style')}`;
-                        if (generator.querySelector('[data-conditional]').checked) {
-                            prompt += `. Retain face features, camera angle and pose. Don't change ${getVal(generator, 'character')} identity`;
+            function handleParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < 150) {
+                            ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = getParticleColor(); ctx.lineWidth = 0.2; ctx.globalAlpha = 1 - (distance / 150);
+                            ctx.stroke(); ctx.globalAlpha = 1;
                         }
-                        break;
-                    case 'pose':
-                        const charPose = getVal(generator, 'character');
-                        prompt = `This ${charPose} is ${getVal(generator, 'action')} ${getVal(generator, 'location')}. Don't change ${charPose} identity`;
-                        break;
-                    case 'expression':
-                        let baseExpr = `Put a ${getVal(generator, 'expression')}`;
-                        if(getVal(generator, 'details')) baseExpr += ` with ${getVal(generator, 'details')}`;
-                        prompt = `${baseExpr} in ${getVal(generator, 'character')} face. Don't change ${getVal(generator, 'pronoun')} identity`;
-                        break;
-                    case 'makeup':
-                        const pronounMakeup = getVal(generator, 'pronoun');
-                        prompt = `Add ${getVal(generator, 'type')} on ${pronounMakeup} face. Don't change ${pronounMakeup} identity`;
-                        break;
-                    case 'background':
-                        prompt = `Change the background to ${getVal(generator, 'new_location')}`;
-                        if (generator.querySelector('[data-conditional]').checked) {
-                            prompt += `. preserves the facial features, the camera angle and the pose of ${getVal(generator, 'character')}`;
-                        }
-                        break;
-                    case 'weather':
-                        prompt = `It's now ${getVal(generator, 'condition')}, ${getVal(generator, 'details')}`;
-                        break;
-                    case 'text':
-                        prompt = `In ${getVal(generator, 'location')}, replace text "${getVal(generator, 'actual_text')}" by "${getVal(generator, 'new_text')}"`;
-                        break;
-                    case 'texture':
-                        prompt = `Design a textured ${getVal(generator, 'object')} made entirely of ${getVal(generator, 'material')}`;
-                        break;
+                    }
                 }
+                animationFrameId = requestAnimationFrame(handleParticles);
+            }
 
-                if (append && outputArea.value) {
-                    outputArea.value += ". " + prompt.charAt(0).toLowerCase() + prompt.slice(1);
+            function setAnimation(isActive) {
+                document.body.classList.toggle('animation-active', isActive);
+                animationToggle.checked = isActive;
+                localStorage.setItem('animation', isActive ? 'on' : 'off');
+                if (isActive) {
+                    resizeCanvas(); initParticles();
+                    if(animationFrameId) cancelAnimationFrame(animationFrameId);
+                    handleParticles();
                 } else {
-                    outputArea.value = prompt;
+                    cancelAnimationFrame(animationFrameId);
+                    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
             }
+            
+            window.addEventListener('resize', () => { if (animationToggle.checked) { resizeCanvas(); initParticles(); } });
+            const savedAnimation = localStorage.getItem('animation');
+            setAnimation(savedAnimation === 'on');
+            animationToggle.addEventListener('change', () => setAnimation(animationToggle.checked));
 
-            // --- BOUTON COPIER ---
+            // --- LOGIQUE DES PROMPTS (inchangée) ---
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => { tab.addEventListener('click', () => { document.querySelector('.tab-button.active').classList.remove('active'); tab.classList.add('active'); document.querySelector('.tab-pane.active').classList.remove('active'); document.getElementById(tab.dataset.tab).classList.add('active'); }); });
+            document.querySelectorAll('input[type="checkbox"][data-conditional]').forEach(checkbox => { const conditionalInput = checkbox.closest('.prompt-generator').querySelector('.conditional-input'); if (conditionalInput) { checkbox.addEventListener('change', () => { conditionalInput.style.display = checkbox.checked ? 'block' : 'none'; }); } });
+            document.querySelectorAll('.prompt-generator').forEach(generator => { const buttonGroup = document.createElement('div'); buttonGroup.className = 'button-group'; buttonGroup.innerHTML = `<button class="btn-generate">Générer</button><button class="btn-append">Ajouter au prompt</button>`; generator.appendChild(buttonGroup); buttonGroup.querySelector('.btn-generate').addEventListener('click', () => processPrompt(generator, false)); buttonGroup.querySelector('.btn-append').addEventListener('click', () => processPrompt(generator, true)); });
+            function getVal(generator, field) { const el = generator.querySelector(`[data-field="${field}"]`); return el ? el.value.trim() : ''; }
+            function processPrompt(generator, append) {
+                const sectionId = generator.dataset.id; let prompt = "";
+                switch(sectionId) {
+                    case 'color': prompt = `Turn ${getVal(generator, 'original_color')} part of ${getVal(generator, 'element')} to ${getVal(generator, 'new_color')}`; break;
+                    case 'remove': prompt = `Remove ${getVal(generator, 'element')} at ${getVal(generator, 'location')} of the image`; break;
+                    case 'add': prompt = `Add ${getVal(generator, 'element')} to the ${getVal(generator, 'location')} of the scene`; break;
+                    case 'style': prompt = `Turn this image style to ${getVal(generator, 'new_style')}`; if (generator.querySelector('[data-conditional]').checked) { prompt += `. Retain face features, camera angle and pose. Don't change ${getVal(generator, 'character')} identity`; } break;
+                    case 'pose': const charPose = getVal(generator, 'character'); prompt = `This ${charPose} is ${getVal(generator, 'action')} ${getVal(generator, 'location')}. Don't change ${charPose} identity`; break;
+                    case 'expression': let baseExpr = `Put a ${getVal(generator, 'expression')}`; if(getVal(generator, 'details')) baseExpr += ` with ${getVal(generator, 'details')}`; prompt = `${baseExpr} in ${getVal(generator, 'character')} face. Don't change ${getVal(generator, 'pronoun')} identity`; break;
+                    case 'makeup': const pronounMakeup = getVal(generator, 'pronoun'); prompt = `Add ${getVal(generator, 'type')} on ${pronounMakeup} face. Don't change ${pronounMakeup} identity`; break;
+                    case 'background': prompt = `Change the background to ${getVal(generator, 'new_location')}`; if (generator.querySelector('[data-conditional]').checked) { prompt += `. preserves the facial features, the camera angle and the pose of ${getVal(generator, 'character')}`; } break;
+                    case 'weather': prompt = `It's now ${getVal(generator, 'condition')}, ${getVal(generator, 'details')}`; break;
+                    case 'text': prompt = `In ${getVal(generator, 'location')}, replace text "${getVal(generator, 'actual_text')}" by "${getVal(generator, 'new_text')}"`; break;
+                    case 'texture': prompt = `Design a textured ${getVal(generator, 'object')} made entirely of ${getVal(generator, 'material')}`; break;
+                }
+                if (append && outputArea.value) { outputArea.value += ". " + prompt.charAt(0).toLowerCase() + prompt.slice(1); } else { outputArea.value = prompt; }
+            }
             const copyButton = document.getElementById('copy-button');
-            copyButton.addEventListener('click', () => {
-                if (!outputArea.value) return;
-                navigator.clipboard.writeText(outputArea.value).then(() => {
-                    const originalText = copyButton.textContent;
-                    copyButton.textContent = 'Copié !';
-                    copyButton.classList.add('success');
-                    setTimeout(() => {
-                        copyButton.textContent = originalText;
-                        copyButton.classList.remove('success');
-                    }, 2000);
-                });
-            });
+            copyButton.addEventListener('click', () => { if (!outputArea.value) return; navigator.clipboard.writeText(outputArea.value).then(() => { const originalText = copyButton.textContent; copyButton.textContent = 'Copié !'; copyButton.classList.add('success'); setTimeout(() => { copyButton.textContent = originalText; copyButton.classList.remove('success'); }, 2000); }); });
         });
     </script>
 </body>
