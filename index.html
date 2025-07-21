@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KONTEXT Studio Pro ✨ - Générateur de Prompts</title>
+    <title>Missty Kontext Studio ✨ - Générateur de Prompts</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
@@ -84,6 +84,16 @@
         header { text-align: center; margin-bottom: 2.5rem; position: relative; }
         h1 { font-weight: 700; font-size: clamp(2.2rem, 5vw, 3rem); color: var(--text-color); margin-bottom: 0.5rem; }
         .subtitle { color: var(--subtle-text-color); margin-top: 0; font-size: 1.1em; }
+        .subtitle a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        .subtitle a:hover {
+            border-color: var(--secondary-color);
+        }
         
         .toggles-container { position: absolute; top: 10px; right: 10px; display: flex; gap: 15px; align-items: center; }
         .toggle-switch { display: inline-block; height: 34px; position: relative; width: 60px; }
@@ -93,16 +103,7 @@
         .slider:before { background-color: white; bottom: 4px; content: ""; height: 26px; left: 4px; position: absolute; transition: .4s; width: 26px; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(26px); }
-        .slider .icon {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            line-height: 1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            user-select: none;
-        }
+        .slider .icon { position: absolute; top: 50%; transform: translateY(-50%); font-size: 18px; line-height: 1; opacity: 0; transition: opacity 0.3s ease; user-select: none; }
         
         /* Icons for Theme Toggle */
         #theme-toggle:not(:checked) ~ .slider .sun,
@@ -116,8 +117,6 @@
         .slider .fx-on { right: 7px; color: var(--secondary-color); }
         .slider .fx-off { left: 7px; color: #aaa; }
 
-
-        /* ... Le reste du CSS est identique ... */
         #output-container { position: sticky; top: 1rem; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07); z-index: 10; margin-bottom: 2rem; transition: background-color 0.3s ease, border-color 0.3s ease; }
         #output-wrapper { display: flex; gap: 1rem; align-items: stretch; }
         #prompt-output { width: 100%; min-height: 90px; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 0.8rem 1rem; border-radius: 8px; font-size: 1.1em; resize: vertical; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
@@ -173,12 +172,11 @@
                     </div>
                 </label>
             </div>
-            <h1>KONTEXT Studio Pro ✨</h1>
-            <p class="subtitle">Votre assistant pour créer des prompts parfaits pour Flux-1 Kontext.</p>
+            <h1>Missty Kontext Studio ✨</h1>
+            <p class="subtitle">Votre assistant pour créer des prompts parfaits, inspiré par <a href="https://www.youtube.com/watch?v=x7Eb5MnAeiA" target="_blank" rel="noopener noreferrer">ce tutoriel vidéo</a>.</p>
         </header>
 
         <main>
-            <!-- Le reste du HTML est inchangé -->
             <div id="output-container">
                 <div id="output-wrapper">
                     <textarea id="prompt-output" readonly placeholder="Votre prompt personnalisé apparaîtra ici..."></textarea>
@@ -293,7 +291,7 @@
         </main>
         
         <footer>
-            <p>Créé avec ❤️ en s'inspirant de la vidéo de <a href="https://www.youtube.com/@misstyflux" target="_blank" rel="noopener noreferrer">Missty Flux</a>. Application par Gemini.</p>
+            <p>Créé avec ❤️ en s'inspirant de la vidéo de <a href="https://www.youtube.com/@missty-Flux" target="_blank" rel="noopener noreferrer">Missty Flux</a>. Application par Gemini.</p>
         </footer>
     </div>
 
@@ -332,6 +330,7 @@
             }
 
             function handleParticles() {
+                if(!ctx) return;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 for (let i = 0; i < particles.length; i++) {
                     particles[i].update();
