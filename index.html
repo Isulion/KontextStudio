@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KONTEXT Studio Pro ✨ - Générateur de Prompts</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        /* --- PALETTE PASTEL --- */
+        :root {
+            --bg-color: #fdf8f5;
+            --surface-color: #ffffff;
+            --primary-color: #aec6cf; /* Pastel Blue */
+            --secondary-color: #ffb3a7; /* Pastel Coral */
+            --text-color: #4a4a4a;
+            --subtle-text-color: #777;
+            --border-color: #e0e0e0;
+            --input-bg: #f5f5f5;
+            --success-color: #77dd77; /* Pastel Green */
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        /* --- HEADER --- */
+        header { text-align: center; margin-bottom: 2.5rem; }
+        h1 {
+            font-weight: 700;
+            font-size: clamp(2.2rem, 5vw, 3rem);
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        .subtitle { color: var(--subtle-text-color); margin-top: 0; font-size: 1.1em; }
+
+        /* --- OUTPUT STICKY --- */
+        #output-container {
+            position: sticky;
+            top: 1rem;
+            background: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+            z-index: 10;
+            margin-bottom: 2rem;
+        }
+        #output-wrapper { display: flex; gap: 1rem; align-items: stretch; }
+        #prompt-output {
+            width: 100%;
+            min-height: 90px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 1.1em;
+            resize: vertical;
+        }
+        #copy-button {
+            padding: 0.8rem 1rem;
+            flex-shrink: 0;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        #copy-button.success {
+            background-color: var(--success-color);
+        }
+
+        /* --- TABS --- */
+        .tabs { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .tab-button {
+            padding: 0.7rem 1.3rem;
+            cursor: pointer;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50px; /* Pill shape */
+            color: var(--subtle-text-color);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .tab-button:hover {
+            border-color: var(--primary-color);
+            color: var(--text-color);
+        }
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(174, 198, 207, 0.5);
+        }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* --- GENERATOR CARDS --- */
+        .prompt-generator {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        h3 { color: var(--secondary-color); margin-top:0; border-bottom: 1px solid var(--border-color); padding-bottom: 0.7rem; margin-bottom: 1.2rem; }
+        .prompt-template {
+            background-color: var(--input-bg);
+            padding: 0.8rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            color: var(--subtle-text-color);
+            font-family: monospace;
+            border-left: 3px solid var(--secondary-color);
+            word-wrap: break-word;
+        }
+        
+        /* --- FORM ELEMENTS --- */
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.9em; color: var(--text-color); }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(174, 198, 207, 0.4); }
+        .conditional-input { display: none; margin-top: 1rem; animation: fadeIn 0.5s ease; }
+        
+        .button-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        button {
+            flex-grow: 1;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        button:active { transform: translateY(0); }
+        .btn-generate { background-color: var(--primary-color); }
+        .btn-append { background: var(--surface-color); border: 2px solid var(--primary-color); color: var(--primary-color); }
+        
+        /* --- TIPS & FOOTER --- */
+        .tips { background-color: rgba(255, 179, 167, 0.15); border-left: 4px solid var(--secondary-color); padding: 1.2rem; margin: 2.5rem 0; border-radius: 4px; }
+        .tips h3 { margin-top: 0; color: var(--secondary-color); border: none; }
+        .tips ul { padding-left: 1.2rem; margin: 0; color: var(--text-color); }
+        
+        footer { text-align: center; margin-top: 3rem; color: #aaa; font-size: 0.9em;}
+        footer a { color: var(--secondary-color); text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>KONTEXT Studio Pro ✨</h1>
+            <p class="subtitle">Votre assistant pour créer des prompts parfaits pour Flux-1 Kontext.</p>
+        </header>
+
+        <main>
+            <div id="output-container">
+                <div id="output-wrapper">
+                    <textarea id="prompt-output" readonly placeholder="Votre prompt personnalisé apparaîtra ici..."></textarea>
+                    <button id="copy-button">Copier</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-button active" data-tab="tab-base">Modifications de Base</button>
+                <button class="tab-button" data-tab="tab-personnages">Personnages</button>
+                <button class="tab-button" data-tab="tab-scenes">Scènes & Objets</button>
+                <button class="tab-button" data-tab="tab-text">Texte & Logos</button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- ==================== TAB BASE ==================== -->
+                <div id="tab-base" class="tab-pane active">
+                    <section class="prompt-generator" data-id="color">
+                        <h3>Changer la couleur</h3>
+                        <div class="prompt-template">Turn [original_color] part of [element] to [new_color]</div>
+                        <div class="input-group"><label>Couleur d'origine</label><input type="text" data-field="original_color" placeholder="ex: black"></div>
+                        <div class="input-group"><label>Élément</label><input type="text" data-field="element" placeholder="ex: hair"></div>
+                        <div class="input-group"><label>Nouvelle couleur</label><input type="text" data-field="new_color" placeholder="ex: red"></div>
+                    </section>
+                    
+                    <section class="prompt-generator" data-id="remove">
+                        <h3>Retirer un élément</h3>
+                        <div class="prompt-template">Remove [element] at [location] of the image</div>
+                        <div class="input-group"><label>Élément à retirer</label><input type="text" data-field="element" placeholder="ex: the bird"></div>
+                        <div class="input-group"><label>Localisation</label><input type="text" data-field="location" placeholder="ex: the top right"></div>
+                    </section>
+                    
+                    <section class="prompt-generator" data-id="add">
+                        <h3>Ajouter un élément</h3>
+                        <div class="prompt-template">Add [element] to the [location] of the scene</div>
+                        <div class="input-group"><label>Objet/personnage</label><input type="text" data-field="element" placeholder="ex: a cute chicken"></div>
+                        <div class="input-group"><label>Localisation</label><input type="text" data-field="location" placeholder="ex: left of the boy"></div>
+                    </section>
+                    
+                     <section class="prompt-generator" data-id="style">
+                        <h3>Changer le Style</h3>
+                        <div class="prompt-template">Turn this image style to [new_style]...</div>
+                        <div class="input-group"><label>Nouveau style</label><input type="text" data-field="new_style" placeholder="ex: anime style"></div>
+                        <div class="input-group">
+                            <input type="checkbox" data-conditional="preserve-identity" id="style-preserve">
+                            <label for="style-preserve" style="display:inline; font-weight:normal;"> Conserver l'identité du personnage ? (Recommandé)</label>
+                        </div>
+                        <div class="conditional-input"><label>Personnage à préserver</label><input type="text" data-field="character" placeholder="ex: her, the man"></div>
+                    </section>
+                </div>
+                
+                <!-- ==================== TAB PERSONNAGES ==================== -->
+                <div id="tab-personnages" class="tab-pane">
+                    <section class="prompt-generator" data-id="pose">
+                        <h3>Changer la pose et le lieu</h3>
+                        <div class="prompt-template">This [character] is [action] [location]. Don't change [character] identity</div>
+                        <div class="input-group"><label>Personnage</label><input type="text" data-field="character" placeholder="ex: woman"></div>
+                        <div class="input-group"><label>Pose/Action</label><input type="text" data-field="action" placeholder="ex: sitting in a deckchair"></div>
+                        <div class="input-group"><label>Lieu</label><input type="text" data-field="location" placeholder="ex: by a swimming pool"></div>
+                    </section>
+                    
+                     <section class="prompt-generator" data-id="expression">
+                        <h3>Changer l'expression</h3>
+                        <div class="prompt-template">Put a [expression]... in [character] face. Don't change [pronoun] identity</div>
+                        <div class="input-group"><label>Expression</label><input type="text" data-field="expression" placeholder="ex: happy expression"></div>
+                        <div class="input-group"><label>Détails (optionnel)</label><input type="text" data-field="details" placeholder="ex: with sparkling eyes"></div>
+                        <div class="input-group"><label>Personnage</label><input type="text" data-field="character" placeholder="ex: woman"></div>
+                        <div class="input-group"><label>Pronom</label><input type="text" data-field="pronoun" placeholder="ex: her"></div>
+                    </section>
+                    
+                    <section class="prompt-generator" data-id="makeup">
+                        <h3>Maquiller ou Tatouer</h3>
+                        <div class="prompt-template">Add [type] on [pronoun] face. Don't change [pronoun] identity</div>
+                        <div class="input-group"><label>Type de maquillage/tatouage</label><input type="text" data-field="type" placeholder="ex: tribal tattoo"></div>
+                        <div class="input-group"><label>Pronom (his/her)</label><input type="text" data-field="pronoun" placeholder="ex: her"></div>
+                    </section>
+                </div>
+
+                <!-- ==================== TAB SCENES ==================== -->
+                <div id="tab-scenes" class="tab-pane">
+                    <section class="prompt-generator" data-id="background">
+                        <h3>Changer l'arrière-plan</h3>
+                        <div class="prompt-template">Change the background to [new_location]...</div>
+                        <div class="input-group"><label>Nouveau lieu</label><input type="text" data-field="new_location" placeholder="ex: a spaceship interior"></div>
+                         <div class="input-group">
+                            <input type="checkbox" data-conditional="preserve-character" id="bg-preserve">
+                            <label for="bg-preserve" style="display:inline; font-weight:normal;"> Conserver les traits du personnage ?</label>
+                        </div>
+                        <div class="conditional-input"><label>Nom du personnage</label><input type="text" data-field="character" placeholder="ex: the panda"></div>
+                    </section>
+                    
+                    <section class="prompt-generator" data-id="weather">
+                        <h3>Changer la météo</h3>
+                        <div class="prompt-template">It's now [condition], [details]</div>
+                        <div class="input-group"><label>Condition météo</label><input type="text" data-field="condition" placeholder="ex: snowing"></div>
+                        <div class="input-group"><label>Détails</label><input type="text" data-field="details" placeholder="ex: everything is covered in snow"></div>
+                    </section>
+                </div>
+                
+                <!-- ==================== TAB TEXTE ==================== -->
+                <div id="tab-text" class="tab-pane">
+                    <section class="prompt-generator" data-id="text">
+                        <h3>Changer un texte</h3>
+                        <div class="prompt-template">In [location], replace text "[actual_text]" by "[new_text]"</div>
+                        <div class="input-group"><label>Localisation</label><input type="text" data-field="location" placeholder="ex: the left of character"></div>
+                        <div class="input-group"><label>Texte actuel</label><input type="text" data-field="actual_text" placeholder="ex: PIKAHI"></div>
+                        <div class="input-group"><label>Nouveau texte</label><input type="text" data-field="new_text" placeholder="ex: PIKACHU"></div>
+                    </section>
+                    
+                    <section class="prompt-generator" data-id="texture">
+                        <h3>Changer la texture</h3>
+                        <div class="prompt-template">Design a textured [object] made entirely of [material]</div>
+                        <div class="input-group"><label>Objet/Logo</label><input type="text" data-field="object" placeholder="ex: logo"></div>
+                        <div class="input-group"><label>Matériau et description</label><input type="text" data-field="material" placeholder="ex: stitched leather, visible seams"></div>
+                    </section>
+                </div>
+            </div>
+            
+            <div class="tips">
+                <h3>Guides d'utilisation avancés</h3>
+                <ul>
+                    <li><strong>Créer une affiche :</strong> Combinez "Mettre en valeur un produit", "Changer un texte" et "Ajouter un élément" en utilisant le bouton "Ajouter" pour construire votre prompt.</li>
+                    <li><strong>Restaurer une photo :</strong> Le prompt générique est <code>Restore this photo, remove any scratch and imperfections. Don't change her identity.</code></li>
+                    <li><strong>Outpainting (agrandir) :</strong> Le prompt est <code>Outpaint this image maintaining the pose, don't change man identity.</code></li>
+                </ul>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Créé avec ❤️ en s'inspirant de la vidéo de <a href="https://www.youtube.com/@misstyflux" target="_blank" rel="noopener noreferrer">Missty Flux</a>. Application par Gemini.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const outputArea = document.getElementById('prompt-output');
+
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelector('.tab-button.active').classList.remove('active');
+                    tab.classList.add('active');
+                    
+                    document.querySelector('.tab-pane.active').classList.remove('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+
+            document.querySelectorAll('input[type="checkbox"][data-conditional]').forEach(checkbox => {
+                const conditionalInput = checkbox.closest('.prompt-generator').querySelector('.conditional-input');
+                if (conditionalInput) {
+                    checkbox.addEventListener('change', () => {
+                        conditionalInput.style.display = checkbox.checked ? 'block' : 'none';
+                    });
+                }
+            });
+
+            document.querySelectorAll('.prompt-generator').forEach(generator => {
+                const sectionId = generator.dataset.id;
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
+                buttonGroup.innerHTML = `
+                    <button class="btn-generate">Générer</button>
+                    <button class="btn-append">Ajouter au prompt</button>
+                `;
+                generator.appendChild(buttonGroup);
+
+                buttonGroup.querySelector('.btn-generate').addEventListener('click', () => processPrompt(generator, false));
+                buttonGroup.querySelector('.btn-append').addEventListener('click', () => processPrompt(generator, true));
+            });
+
+            function getVal(generator, field) {
+                const el = generator.querySelector(`[data-field="${field}"]`);
+                return el ? el.value.trim() : '';
+            }
+
+            function processPrompt(generator, append) {
+                const sectionId = generator.dataset.id;
+                let prompt = "";
+
+                switch(sectionId) {
+                    case 'color':
+                        prompt = `Turn ${getVal(generator, 'original_color')} part of ${getVal(generator, 'element')} to ${getVal(generator, 'new_color')}`;
+                        break;
+                    case 'remove':
+                        prompt = `Remove ${getVal(generator, 'element')} at ${getVal(generator, 'location')} of the image`;
+                        break;
+                    case 'add':
+                        prompt = `Add ${getVal(generator, 'element')} to the ${getVal(generator, 'location')} of the scene`;
+                        break;
+                    case 'style':
+                        prompt = `Turn this image style to ${getVal(generator, 'new_style')}`;
+                        if (generator.querySelector('[data-conditional]').checked) {
+                            prompt += `. Retain face features, camera angle and pose. Don't change ${getVal(generator, 'character')} identity`;
+                        }
+                        break;
+                    case 'pose':
+                        const charPose = getVal(generator, 'character');
+                        prompt = `This ${charPose} is ${getVal(generator, 'action')} ${getVal(generator, 'location')}. Don't change ${charPose} identity`;
+                        break;
+                    case 'expression':
+                        let baseExpr = `Put a ${getVal(generator, 'expression')}`;
+                        if(getVal(generator, 'details')) baseExpr += ` with ${getVal(generator, 'details')}`;
+                        prompt = `${baseExpr} in ${getVal(generator, 'character')} face. Don't change ${getVal(generator, 'pronoun')} identity`;
+                        break;
+                    case 'makeup':
+                        const pronounMakeup = getVal(generator, 'pronoun');
+                        prompt = `Add ${getVal(generator, 'type')} on ${pronounMakeup} face. Don't change ${pronounMakeup} identity`;
+                        break;
+                    case 'background':
+                        prompt = `Change the background to ${getVal(generator, 'new_location')}`;
+                        if (generator.querySelector('[data-conditional]').checked) {
+                            prompt += `. preserves the facial features, the camera angle and the pose of ${getVal(generator, 'character')}`;
+                        }
+                        break;
+                    case 'weather':
+                        prompt = `It's now ${getVal(generator, 'condition')}, ${getVal(generator, 'details')}`;
+                        break;
+                    case 'text':
+                        prompt = `In ${getVal(generator, 'location')}, replace text "${getVal(generator, 'actual_text')}" by "${getVal(generator, 'new_text')}"`;
+                        break;
+                    case 'texture':
+                        prompt = `Design a textured ${getVal(generator, 'object')} made entirely of ${getVal(generator, 'material')}`;
+                        break;
+                }
+
+                if (append && outputArea.value) {
+                    outputArea.value += ". " + prompt.charAt(0).toLowerCase() + prompt.slice(1);
+                } else {
+                    outputArea.value = prompt;
+                }
+            }
+
+            const copyButton = document.getElementById('copy-button');
+            copyButton.addEventListener('click', () => {
+                if (!outputArea.value) return;
+                navigator.clipboard.writeText(outputArea.value).then(() => {
+                    copyButton.textContent = 'Copié !';
+                    copyButton.classList.add('success');
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copier';
+                        copyButton.classList.remove('success');
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
